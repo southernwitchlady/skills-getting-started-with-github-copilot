@@ -153,10 +153,13 @@ def signup_for_activity(activity_name: str, email: str):
     
     # Persist to database if using MongoDB
     if USE_DATABASE:
-        activities_collection.update_one(
-            {"_id": activity_name},
-            {"$push": {"participants": email}}
-        )
+        try:
+            activities_collection.update_one(
+                {"_id": activity_name},
+                {"$push": {"participants": email}}
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
     
     return {"message": f"Signed up {email} for {activity_name}"}
 
@@ -181,13 +184,13 @@ def unregister_from_activity(activity_name: str, email: str):
 
     # Remove student
     activity["participants"].remove(email)
-    
-    # Persist to database if using MongoDB
-    if USE_DATABASE:
+    try:
         activities_collection.update_one(
             {"_id": activity_name},
             {"$pull": {"participants": email}}
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
     
     return {"message": f"Unregistered {email} from {activity_name}"}
 
