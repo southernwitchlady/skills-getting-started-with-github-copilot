@@ -150,6 +150,14 @@ def signup_for_activity(activity_name: str, email: str):
 
     # Add student
     activity["participants"].append(email)
+    
+    # Persist to database if using MongoDB
+    if USE_DATABASE:
+        activities_collection.update_one(
+            {"_id": activity_name},
+            {"$push": {"participants": email}}
+        )
+    
     return {"message": f"Signed up {email} for {activity_name}"}
 
 
@@ -173,6 +181,14 @@ def unregister_from_activity(activity_name: str, email: str):
 
     # Remove student
     activity["participants"].remove(email)
+    
+    # Persist to database if using MongoDB
+    if USE_DATABASE:
+        activities_collection.update_one(
+            {"_id": activity_name},
+            {"$pull": {"participants": email}}
+        )
+    
     return {"message": f"Unregistered {email} from {activity_name}"}
 
 
