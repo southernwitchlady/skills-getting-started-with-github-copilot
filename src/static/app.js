@@ -49,6 +49,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Function to handle unregistering a participant
+  async function unregisterParticipant(activity, email) {
+    try {
+      const response = await fetch(`/activities/${encodeURIComponent(activity)}/unregister?email=${encodeURIComponent(email)}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(result.message);
+        fetchActivities(); // Refresh activities list
+      } else {
+        alert(result.detail || "An error occurred");
+      }
+    } catch (error) {
+      console.error("Error unregistering participant:", error);
+      alert("Failed to unregister participant. Please try again.");
+    }
+  }
+
+  // Add delete icons to participants
+  function addUnregisterButtons() {
+    document.querySelectorAll(".participants-section ul li").forEach((li) => {
+      const email = li.textContent.trim();
+      const activity = li.closest(".activity-card").querySelector("h4").textContent;
+
+      const deleteIcon = document.createElement("span");
+      deleteIcon.textContent = "❌";
+      deleteIcon.style.cursor = "pointer";
+      deleteIcon.style.marginLeft = "10px";
+      deleteIcon.addEventListener("click", () => unregisterParticipant(activity, email));
+
+      li.appendChild(deleteIcon);
+    });
+  }
+
   // Handle form submission
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -90,5 +127,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Initialize app
-  fetchActivities();
+  fetchActivities().then(addUnregisterButtons);
 });

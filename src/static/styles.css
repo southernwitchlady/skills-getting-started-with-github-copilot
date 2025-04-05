@@ -181,6 +181,16 @@ button:hover {
   color: #555;
 }
 
+.participants-section ul li span {
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.participants-section ul li span:hover {
+  text-decoration: underline;
+}
+
 footer {
   text-align: center;
   margin-top: 30px;
