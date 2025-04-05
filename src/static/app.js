@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .map(participant => `
             <li>
               ${participant}
-              <span onclick="unregisterParticipant('${name}', '${participant}')">❌</span>
+              <span class="unregister-btn" data-activity="${name}" data-participant="${participant}">❌</span>
             </li>
           `)
           .join("");
@@ -122,6 +122,15 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.className = "error";
       messageDiv.classList.remove("hidden");
       console.error("Error signing up:", error);
+    }
+  });
+
+  // Add event listener for unregister buttons
+  activitiesList.addEventListener("click", (event) => {
+    if (event.target.classList.contains("unregister-btn")) {
+      const activity = event.target.dataset.activity;
+      const participant = event.target.dataset.participant;
+      unregisterParticipant(activity, participant);
     }
   });
 
