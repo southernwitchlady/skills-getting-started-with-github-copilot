@@ -10,7 +10,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
 from pathlib import Path
-from typing import Optional
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -150,6 +149,17 @@ def signup_for_activity(activity_name: str, email: str):
 
     # Add student
     activity["participants"].append(email)
+    
+    # Persist to database if using MongoDB
+    if USE_DATABASE:
+        try:
+            activities_collection.update_one(
+                {"_id": activity_name},
+                {"$push": {"participants": email}}
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
+    
     return {"message": f"Signed up {email} for {activity_name}"}
 
 
@@ -173,6 +183,14 @@ def unregister_from_activity(activity_name: str, email: str):
 
     # Remove student
     activity["participants"].remove(email)
+    try:
+        activities_collection.update_one(
+            {"_id": activity_name},
+            {"$pull": {"participants": email}}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database update failed: {str(e)}")
+    
     return {"message": f"Unregistered {email} from {activity_name}"}
 
 
