@@ -10,10 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear loading message 
       activitiesList.innerHTML = "";
+      activitySelect.innerHTML = "<option value=''>-- Select an activity --</option>";
 
-      // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
@@ -21,7 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const spotsLeft = details.max_participants - details.participants.length;
 
         const participantsList = details.participants
-          .map((participant) => `<li>${participant}</li>`)
+          .map(participant => `
+            <li>
+              ${participant}
+              <span onclick="unregisterParticipant('${name}', '${participant}')">❌</span>
+            </li>
+          `)
           .join("");
 
         activityCard.innerHTML = `
@@ -37,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         activitiesList.appendChild(activityCard);
 
-        // Add option to select dropdown
         const option = document.createElement("option");
         option.value = name;
         option.textContent = name;
@@ -59,31 +63,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(result.message);
-        fetchActivities(); // Refresh activities list
+        // Refresh activities list to show updated participants
+        fetchActivities();
+        
+        messageDiv.textContent = result.message;
+        messageDiv.className = "success";
       } else {
-        alert(result.detail || "An error occurred");
+        messageDiv.textContent = result.detail || "An error occurred";
+        messageDiv.className = "error";
       }
+
+      messageDiv.classList.remove("hidden");
+      setTimeout(() => {
+        messageDiv.classList.add("hidden");
+      }, 5000);
     } catch (error) {
       console.error("Error unregistering participant:", error);
-      alert("Failed to unregister participant. Please try again.");
+      messageDiv.textContent = "Failed to unregister participant. Please try again.";
+      messageDiv.className = "error";
+      messageDiv.classList.remove("hidden");
     }
-  }
-
-  // Add delete icons to participants
-  function addUnregisterButtons() {
-    document.querySelectorAll(".participants-section ul li").forEach((li) => {
-      const email = li.textContent.trim();
-      const activity = li.closest(".activity-card").querySelector("h4").textContent;
-
-      const deleteIcon = document.createElement("span");
-      deleteIcon.textContent = "❌";
-      deleteIcon.style.cursor = "pointer";
-      deleteIcon.style.marginLeft = "10px";
-      deleteIcon.addEventListener("click", () => unregisterParticipant(activity, email));
-
-      li.appendChild(deleteIcon);
-    });
   }
 
   // Handle form submission
@@ -127,5 +126,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Initialize app
-  fetchActivities().then(addUnregisterButtons);
+  fetchActivities();
 });
