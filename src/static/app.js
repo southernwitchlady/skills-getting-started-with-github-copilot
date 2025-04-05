@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .map(participant => `
             <li>
               ${participant}
-              <span class="unregister-btn" data-activity="${name}" data-participant="${participant}">❌</span>
+              <button class="unregister-btn" data-activity="${name}" data-participant="${participant}">❌</button>
             </li>
           `)
           .join("");
@@ -127,9 +127,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add event listener for unregister buttons
   activitiesList.addEventListener("click", (event) => {
-    if (event.target.classList.contains("unregister-btn")) {
-      const activity = event.target.dataset.activity;
-      const participant = event.target.dataset.participant;
+    const button = event.target.closest(".unregister-btn");
+    if (button) {
+      const activity = button.dataset.activity;
+      const participant = button.dataset.participant;
       unregisterParticipant(activity, participant);
     }
   });
